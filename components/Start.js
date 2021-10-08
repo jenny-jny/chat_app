@@ -50,13 +50,13 @@ const styles = StyleSheet.create({
     borderColor: 'gray', 
     borderWidth: 1, 
     fontSize: 16, 
-    fontWeight: 600, 
+    fontWeight: "600", 
     color: '#757083',
     opacity: 0.5
   },
   backgroundColorText: {
     fontSize: 16, 
-    fontWeight: 300, 
+    fontWeight: "300", 
     color: '#757083', 
     opacity: 1
   },
@@ -89,6 +89,6 @@ const styles = StyleSheet.create({
   },
   button: {
     fontSize: 16, 
-    fontWeight: 600
+    fontWeight: "600"
   }
 });
