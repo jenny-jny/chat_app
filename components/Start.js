@@ -12,23 +12,25 @@ export default class Start extends Component{
     return (
       <ImageBackground style={styles.backgroundImage} source={require('../assets/background_image.png')} resizeMode="cover">
         <View style={styles.container}>
-          <TextInput style={styles.textBox} onChangeText={(name) => {this.setState({name})}} value={this.state.name} placeholder='Your Name'/>
-          <Text style={styles.backgroundColorText}>Choose Background Color:</Text>
-          <View style={styles.backgroundColorContainer}>
-            <Pressable onPress={() => {this.setState({backgroundColor: '#090C08'})}}>
-              <View style={styles.blackBackgroundColor}></View>
-            </Pressable>
-            <Pressable onPress={() => {this.setState({backgroundColor: '#474056'})}}>
-              <View style={styles.darkGrayBackgroundColor}></View>
-            </Pressable>
-            <Pressable onPress={() => {this.setState({backgroundColor: '#8A95A5'})}}>
-              <View style={styles.lightGrayBackgroundColor}></View>
-            </Pressable>
-            <Pressable onPress={() => {this.setState({backgroundColor: '#B9C6AE'})}}>
-              <View style={styles.khakiBackgroundColor}></View>
-            </Pressable>
+          <View style={styles.wrapper}>
+            <TextInput style={styles.textBox} onChangeText={(name) => {this.setState({name})}} value={this.state.name} placeholder='Your Name'/>
+            <Text style={styles.backgroundColorText}>Choose Background Color:</Text>
+            <View style={styles.backgroundColorContainer}>
+              <Pressable onPress={() => {this.setState({backgroundColor: '#090C08'})}}>
+                <View style={styles.blackBackgroundColor}></View>
+              </Pressable>
+              <Pressable onPress={() => {this.setState({backgroundColor: '#474056'})}}>
+                <View style={styles.darkGrayBackgroundColor}></View>
+              </Pressable>
+              <Pressable onPress={() => {this.setState({backgroundColor: '#8A95A5'})}}>
+                <View style={styles.lightGrayBackgroundColor}></View>
+              </Pressable>
+              <Pressable onPress={() => {this.setState({backgroundColor: '#B9C6AE'})}}>
+                <View style={styles.khakiBackgroundColor}></View>
+              </Pressable>
+            </View>
+            <Button style={styles.button} color='#757083' title="Start Chatting" onPress={() => this.props.navigation.navigate('Chat', {name: this.state.name, backgroundColor: this.state.backgroundColor})}/>
           </View>
-          <Button style={styles.button} color='#757083' title="Start Chatting" onPress={() => this.props.navigation.navigate('Chat', {name: this.state.name, backgroundColor: this.state.backgroundColor})}/>
         </View>
       </ImageBackground>
     );
@@ -44,6 +46,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  wrapper: {
+    backgroundColor: 'white'
   },
   textBox: {
     height: 40, 
