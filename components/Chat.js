@@ -24,9 +24,9 @@ export default class Chat extends Component {
   }
 
   onSend(messages = []) {
-    this.setState(previousState => {
+    this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages)
-    })
+    }))
   }
 
   render() {
