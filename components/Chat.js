@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet} from 'react-native';
+import { View, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
 
 export default class Chat extends Component {
@@ -35,6 +35,7 @@ export default class Chat extends Component {
     return (
       <View style={[styles.container, {backgroundColor: backgroundColor}]}>
         <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={{_id: 1}}/>
+        {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height"/> : null}
       </View>
     );
   }
@@ -43,7 +44,7 @@ export default class Chat extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
+    // alignItems: 'center',
+    // justifyContent: 'center'
   }
 });
