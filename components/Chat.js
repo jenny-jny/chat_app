@@ -3,6 +3,18 @@ import { View, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
 import firebase from 'firebase';
 import { Bubble, GiftedChat } from 'react-native-gifted-chat';
 
+const firebaseConfig = {
+  apiKey: "AIzaSyCqZ-iB_h3D8w_CkM8H5i5hmAh2dVvt4z4",
+  authDomain: "chat-app-b5390.firebaseapp.com",
+  projectId: "chat-app-b5390",
+  storageBucket: "chat-app-b5390.appspot.com",
+  messagingSenderId: "299401357206"
+}
+
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
+
 export default class Chat extends Component {
   constructor() {
     super();
