@@ -88,11 +88,7 @@ export default class Chat extends Component {
         //update user state with currently active user data
         this.setState({
           loggedInText: '',
-          messages: [{
-            user: {
-              _id: user.uid
-            }
-          }],
+          messages: [],
           user: {
             _id: user.uid,
             name: name
@@ -101,7 +97,7 @@ export default class Chat extends Component {
         })
       
       //create a promise to the active user's documents (messages)
-      this.referenceChatMessagesUser = firebase.firestore().collection('messages').where('user._id', '==', this.state.messages[0].user._id);
+      this.referenceChatMessagesUser = firebase.firestore().collection('messages').where('user._id', '==', this.state.user._id);
 
       this.referenceChatMessagesUser.get().then((querySnapshot) => {
         if(this.checkNullUndefined(querySnapshot)){
