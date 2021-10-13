@@ -14,7 +14,7 @@ const firebaseConfig = {
 export default class Chat extends Component {
   constructor() {
     super();
-    this.state = { messages: [], loggedInText: 'Please wait. You are being logged in.' }
+    this.state = { loggedInText: 'Please wait. You are being logged in.', messages: [], user: {_id: '', name: ''} }
 
     if(!firebase.apps.length){
       firebase.initializeApp(firebaseConfig);
@@ -22,15 +22,6 @@ export default class Chat extends Component {
 
     this.referenceChatMessages = firebase.firestore().collection('messages');
   }
-
-    // _id: 2,
-    // text: 'Hello developer',
-    // createdAt: new Date(),
-    // user: {
-    //   _id: 2,
-    //   name: 'React Native',
-    //   avatar: 'https://placeimg.com/140/140/any'
-    // }
 
   onCollectionUpdate = querySnapshot => {
     const messages = [];
@@ -81,6 +72,9 @@ export default class Chat extends Component {
     //   ]
     // })
 
+    let { name } = this.props.route.params;
+    this.props.navigation.setOptions({ title: name });
+
     //create a promise to shoppinglists collection
     this.referenceChatMessages = firebase.firestore().collection('messages');
 
@@ -90,14 +84,19 @@ export default class Chat extends Component {
         if(!user){
           await firebase.auth().signInAnonymously();
         }
+
         //update user state with currently active user data
         this.setState({
+          loggedInText: '',
           messages: [{
             user: {
               _id: user.uid
             }
           }],
-          loggedInText: '',
+          user: {
+            _id: user.uid,
+            name: name
+          }
           // messages: []
         })
       
@@ -124,15 +123,13 @@ export default class Chat extends Component {
     this.unsubscribe();
   }
 
-    // _id: 2,
-    // text: 'Hello developer',
-    // createdAt: new Date(),
-    // user: {
-    //   _id: 2,
-    //   name: 'React Native',
-    //   avatar: 'https://placeimg.com/140/140/any'
-    // }
-
+  onSend(messages = []) {
+    this.setState(previousState => ({
+      messages: GiftedChat.append(previousState.messages, messages)
+    }), () => {
+      this.addMessages();
+    })
+  }
 
   //add a new list to the collection
   addMessages(){
@@ -145,14 +142,6 @@ export default class Chat extends Component {
     });
   }
 
-  onSend(messages = []) {
-    this.setState(previousState => ({
-      messages: GiftedChat.append(previousState.messages, messages)
-    }), () => {
-      this.addMessages();
-    })
-  }
-
   renderBubble(props){
     return (
       <Bubble {...props} wrapperStyle={{right: {backgroundColor: '#000'}}}/>
@@ -160,12 +149,11 @@ export default class Chat extends Component {
   }
 
   render() {
-    let { name, backgroundColor } = this.props.route.params;
-    this.props.navigation.setOptions({ title: name });
+    let { backgroundColor } = this.props.route.params;
     return (
       <View style={[styles.container, {backgroundColor: backgroundColor}]}>
         <Text>{this.state.loggedInText}</Text>
-        <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={this.state.messages.user} renderBubble={this.renderBubble.bind(this)}/>
+        <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={this.state.user} renderBubble={this.renderBubble.bind(this)}/>
         {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height"/> : null}
       </View>
     );

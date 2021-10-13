@@ -13,7 +13,7 @@ export default class Start extends Component{
       <ImageBackground style={styles.backgroundImage} source={require('../assets/background_image.png')} resizeMode="cover">
         <View style={styles.container}>
           <View style={styles.wrapper}>
-            <TextInput style={styles.textBox} onChangeText={(name) => {this.setState({name})}} value={this.state.name} placeholder='Your Name'/>
+            <TextInput style={styles.textBox} onChangeText={(name) => {this.setState({name})}} value={this.state.name || ''} placeholder='Your Name'/>
             <Text style={styles.backgroundColorText}>Choose Background Color:</Text>
             <View style={styles.backgroundColorContainer}>
               <Pressable onPress={() => {this.setState({backgroundColor: '#090C08'})}}>
