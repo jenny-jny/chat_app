@@ -45,10 +45,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   wrapper: {
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    padding: 20
   },
   textBox: {
     height: 40, 
