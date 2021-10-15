@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { View, Text, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 import firebase from 'firebase';
-import { Bubble, GiftedChat } from 'react-native-gifted-chat';
+import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCqZ-iB_h3D8w_CkM8H5i5hmAh2dVvt4z4",
@@ -14,13 +16,40 @@ const firebaseConfig = {
 export default class Chat extends Component {
   constructor() {
     super();
-    this.state = { loggedInText: 'Please wait. You are being logged in.', messages: [], user: {_id: '', name: ''} }
+    this.state = { 
+      isConnected: false,
+      loggedInText: 'Please wait. You are being logged in.', 
+      messages: [], 
+      user: {_id: '', name: ''} 
+    }
 
     if(!firebase.apps.length){
       firebase.initializeApp(firebaseConfig);
     }
 
     this.referenceChatMessages = firebase.firestore().collection('messages');
+  }
+
+  async getMessages(){
+    let messages = '';
+    try{
+      messages = await AsyncStorage.getItem('messages') || [];
+      this.setState({
+        messages: JSON.parse(messages)
+      });
+    }catch(error){
+      console.log(error.message);
+    }
+  }
+
+  checkNullUndefined(array){
+    let result = false;
+    array.forEach((element) => {
+      if(element == null || element == undefined){
+        result = true;
+      }
+    })
+    return result;
   }
 
   onCollectionUpdate = querySnapshot => {
@@ -40,14 +69,21 @@ export default class Chat extends Component {
     });
   };
 
-  checkNullUndefined(array){
-    let result = false;
-    array.forEach((element) => {
-      if(element == null || element == undefined){
-        result = true;
-      }
-    })
-    return result;
+  async saveMessages(){
+    try{
+      await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+    }catch(error){
+      console.log(error.message);
+    }
+  }
+
+  async deleteMessages(){
+    try{
+      await AsyncStorage.removeItem('messages');
+      this.setState({messages: []})
+    }catch(error){
+      console.log(error.message);
+    }
   }
 
   componentDidMount() {
@@ -75,40 +111,51 @@ export default class Chat extends Component {
     let { name } = this.props.route.params;
     this.props.navigation.setOptions({ title: name });
 
-    //create a promise to shoppinglists collection
-    this.referenceChatMessages = firebase.firestore().collection('messages');
+    NetInfo.fetch().then(connection => {
+      if(connection.isConnected){
+        this.setState({isConnected: true});
+        console.log('online');
 
-    //listen to authentication events
-    this.authUnsubscribe = firebase.auth().onAuthStateChanged(
-      async (user) => {
-        if(!user){
-          await firebase.auth().signInAnonymously();
-        }
+        //create a promise to messages collection
+        this.referenceChatMessages = firebase.firestore().collection('messages');
 
-        //update user state with currently active user data
-        this.setState({
-          loggedInText: '',
-          messages: [],
-          user: {
-            _id: user.uid,
-            name: name
-          }
-          // messages: []
-        })
-      
-      //create a promise to the active user's documents (messages)
-      this.referenceChatMessagesUser = firebase.firestore().collection('messages').where('user._id', '==', this.state.user._id);
+        //listen to authentication events
+        this.authUnsubscribe = firebase.auth().onAuthStateChanged(
+          async (user) => {
+            if(!user){
+              await firebase.auth().signInAnonymously();
+            }
 
-      this.referenceChatMessagesUser.get().then((querySnapshot) => {
-        if(this.checkNullUndefined(querySnapshot)){
-          alert('The messages contain undefined or null values');
-        }else{
-          //listen for collection changes for current user
-          this.unsubscribe = this.referenceChatMessages.orderBy('createdAt', 'desc').onSnapshot(this.onCollectionUpdate);
-        }
-      }).catch((error) => {
-        console.log("Error getting documents: ", error);
-      });
+            //update user state with currently active user data
+            this.setState({
+              loggedInText: '',
+              messages: [],
+              user: {
+                _id: user.uid,
+                name: name
+              }
+            })
+          
+          //create a promise to the active user's documents (messages)
+          this.referenceChatMessagesUser = firebase.firestore().collection('messages').where('user._id', '==', this.state.user._id);
+
+          this.referenceChatMessagesUser.get().then((querySnapshot) => {
+            if(this.checkNullUndefined(querySnapshot)){
+              alert('The messages contain undefined or null values');
+            }else{
+              //listen for collection changes for current user
+              this.unsubscribe = this.referenceChatMessages.orderBy('createdAt', 'desc').onSnapshot(this.onCollectionUpdate);
+            }
+          }).catch((error) => {
+            console.log("Error getting documents: ", error);
+          });
+
+          this.saveMessages();
+        });
+      }else{
+        console.log('offline');
+        this.getMessages();
+      }
     });
   }
 
@@ -119,22 +166,26 @@ export default class Chat extends Component {
     this.unsubscribe();
   }
 
+    //add a new messages to the collection
+    addMessages(){
+      const message = this.state.messages[0];
+      this.referenceChatMessages.add({
+        _id: message._id,
+        text: message.text,
+        createdAt: message.createdAt,
+        user: message.user
+      });
+    }
+
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages)
     }), () => {
-      this.addMessages();
-    })
-  }
-
-  //add a new list to the collection
-  addMessages(){
-    const message = this.state.messages[0];
-    this.referenceChatMessages.add({
-      _id: message._id,
-      text: message.text,
-      createdAt: message.createdAt,
-      user: message.user
+      if(this.state.isConnected === false){
+        this.saveMessages();
+      }else{
+        this.addMessages();
+      }
     });
   }
 
@@ -144,12 +195,21 @@ export default class Chat extends Component {
     );
   }
 
+  renderInputToolbar(props){
+    if(this.state.isConnected == false){
+    }else{
+      return (
+        <InputToolbar {...props}/>
+      );
+    }
+  }
+
   render() {
     let { backgroundColor } = this.props.route.params;
     return (
       <View style={[styles.container, {backgroundColor: backgroundColor}]}>
         <Text>{this.state.loggedInText}</Text>
-        <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={this.state.user} renderBubble={this.renderBubble.bind(this)}/>
+        <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={this.state.user} renderBubble={this.renderBubble.bind(this)} renderInputToolbar={this.renderInputToolbar}/>
         {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height"/> : null}
       </View>
     );
