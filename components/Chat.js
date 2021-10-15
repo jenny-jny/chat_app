@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import firebase from 'firebase';
 import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
@@ -23,11 +23,12 @@ export default class Chat extends Component {
       user: {_id: '', name: ''} 
     }
 
-    if(!firebase.apps.length){
-      firebase.initializeApp(firebaseConfig);
-    }
+    // if(!firebase.apps.length){
+    //   firebase.initializeApp(firebaseConfig);
+    // }
 
-    this.referenceChatMessages = firebase.firestore().collection('messages');
+    // //create a promise to messages collection
+    // this.referenceChatMessages = firebase.firestore().collection('messages');
   }
 
   async getMessages(){
@@ -37,6 +38,7 @@ export default class Chat extends Component {
       this.setState({
         messages: JSON.parse(messages)
       });
+      console.log(this.state.messages);
     }catch(error){
       console.log(error.message);
     }
@@ -71,6 +73,8 @@ export default class Chat extends Component {
 
   async saveMessages(){
     try{
+      console.log(this.state.messages);
+      console.log(AsyncStorage.getItem('messages'));
       await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
     }catch(error){
       console.log(error.message);
@@ -116,6 +120,10 @@ export default class Chat extends Component {
         this.setState({isConnected: true});
         console.log('online');
 
+        if(!firebase.apps.length){
+          firebase.initializeApp(firebaseConfig);
+        }
+    
         //create a promise to messages collection
         this.referenceChatMessages = firebase.firestore().collection('messages');
 
@@ -134,7 +142,7 @@ export default class Chat extends Component {
                 _id: user.uid,
                 name: name
               }
-            })
+            });
           
           //create a promise to the active user's documents (messages)
           this.referenceChatMessagesUser = firebase.firestore().collection('messages').where('user._id', '==', this.state.user._id);
@@ -149,11 +157,13 @@ export default class Chat extends Component {
           }).catch((error) => {
             console.log("Error getting documents: ", error);
           });
-
           this.saveMessages();
         });
       }else{
         console.log('offline');
+        this.setState({
+          loggedInText: 'You are in offline mode.'
+        });
         this.getMessages();
       }
     });
@@ -166,16 +176,16 @@ export default class Chat extends Component {
     this.unsubscribe();
   }
 
-    //add a new messages to the collection
-    addMessages(){
-      const message = this.state.messages[0];
-      this.referenceChatMessages.add({
-        _id: message._id,
-        text: message.text,
-        createdAt: message.createdAt,
-        user: message.user
-      });
-    }
+  //add a new messages to the collection
+  addMessages(){
+    const message = this.state.messages[0];
+    this.referenceChatMessages.add({
+      _id: message._id,
+      text: message.text,
+      createdAt: message.createdAt,
+      user: message.user
+    });
+  }
 
   onSend(messages = []) {
     this.setState(previousState => ({
@@ -196,7 +206,7 @@ export default class Chat extends Component {
   }
 
   renderInputToolbar(props){
-    if(this.state.isConnected == false){
+    if(this.state.isConnected === false){
     }else{
       return (
         <InputToolbar {...props}/>
@@ -209,7 +219,7 @@ export default class Chat extends Component {
     return (
       <View style={[styles.container, {backgroundColor: backgroundColor}]}>
         <Text>{this.state.loggedInText}</Text>
-        <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={this.state.user} renderBubble={this.renderBubble.bind(this)} renderInputToolbar={this.renderInputToolbar}/>
+        <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={this.state.user} renderBubble={this.renderBubble.bind(this)} renderInputToolbar={this.renderInputToolbar.bind(this)}/>
         {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height"/> : null}
       </View>
     );
