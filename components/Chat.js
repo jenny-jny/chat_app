@@ -38,7 +38,6 @@ export default class Chat extends Component {
       this.setState({
         messages: JSON.parse(messages)
       });
-      console.log(this.state.messages);
     }catch(error){
       console.log(error.message);
     }
@@ -68,13 +67,12 @@ export default class Chat extends Component {
         system: data.system
       });
       this.setState({messages});
+      this.saveMessages();
     });
   };
 
   async saveMessages(){
     try{
-      console.log(this.state.messages);
-      console.log(AsyncStorage.getItem('messages'));
       await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
     }catch(error){
       console.log(error.message);
@@ -157,7 +155,6 @@ export default class Chat extends Component {
           }).catch((error) => {
             console.log("Error getting documents: ", error);
           });
-          this.saveMessages();
         });
       }else{
         console.log('offline');
