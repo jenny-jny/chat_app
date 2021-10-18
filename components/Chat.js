@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { View, Text, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import firebase from 'firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import firebase from 'firebase';
+import MapView from 'react-native-maps';
+import { View, Text, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
 import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 
 import CustomActions from './CustomActions';
@@ -108,6 +109,32 @@ export default class Chat extends Component {
     //         name: 'React Native',
     //         avatar: 'https://placeimg.com/140/140/any'
     //       }
+    //     },
+    //     // Add image data to the message object
+    //     {
+    //       _id: 3,
+    //       text: 'My message',
+    //       createdAt: new Date(Date.UTC(2016, 5, 11, 17, 20, 0)),
+    //       user: {
+    //         _id: 2,
+    //         name: 'React Native',
+    //         avatar: 'https://facebook.github.io/react-native/img/header_logo.png',
+    //       },
+    //       image: 'https://facebook.github.io/react-native/img/header_logo.png',
+    //     },
+    //     // Add location data to the message object
+    //     {
+    //       _id: 4,
+    //       createdAt: new Date(),
+    //       user: {
+    //         _id: 2,
+    //         name: 'React Native',
+    //         avatar: 'https://placeimg.com/140/140/any',
+    //       },
+    //       location: {
+    //         latitude: 48.864601,
+    //         longitude: 2.398704,
+    //       },
     //     }
     //   ]
     // })
@@ -217,12 +244,22 @@ export default class Chat extends Component {
     return <CustomActions {...props}/>;
   }
 
+  renderCustomView(props){
+    const currentMessage = props;
+    if(currentMessage.location){
+      return (
+        <MapView style={{width: 150, height: 100, borderRadius: 13, margin: 3}} region={{latitude: currentMessage.location.latitude, longitude: currentMessage.location.longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421}}/>
+      );
+    }
+    return null;
+  }
+
   render() {
     let { backgroundColor } = this.props.route.params;
     return (
       <View style={[styles.container, {backgroundColor: backgroundColor}]}>
         <Text>{this.state.loggedInText}</Text>
-        <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={this.state.user} renderBubble={this.renderBubble.bind(this)} renderInputToolbar={this.renderInputToolbar.bind(this)} renderActions={this.renderCustomActions}/>
+        <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={this.state.user} renderBubble={this.renderBubble.bind(this)} renderInputToolbar={this.renderInputToolbar.bind(this)} renderActions={this.renderCustomActions} renderCustomView={this.renderCustomView}/>
         {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height"/> : null}
       </View>
     );
