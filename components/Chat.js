@@ -5,6 +5,8 @@ import NetInfo from '@react-native-community/netinfo';
 import firebase from 'firebase';
 import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 
+import CustomActions from './CustomActions';
+
 const firebaseConfig = {
   apiKey: "AIzaSyCqZ-iB_h3D8w_CkM8H5i5hmAh2dVvt4z4",
   authDomain: "chat-app-b5390.firebaseapp.com",
@@ -211,12 +213,16 @@ export default class Chat extends Component {
     }
   }
 
+  renderCustomActions(props){
+    return <CustomActions {...props}/>;
+  }
+
   render() {
     let { backgroundColor } = this.props.route.params;
     return (
       <View style={[styles.container, {backgroundColor: backgroundColor}]}>
         <Text>{this.state.loggedInText}</Text>
-        <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={this.state.user} renderBubble={this.renderBubble.bind(this)} renderInputToolbar={this.renderInputToolbar.bind(this)}/>
+        <GiftedChat messages={this.state.messages} onSend={messages => this.onSend(messages)} user={this.state.user} renderBubble={this.renderBubble.bind(this)} renderInputToolbar={this.renderInputToolbar.bind(this)} renderActions={this.renderCustomActions}/>
         {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height"/> : null}
       </View>
     );
