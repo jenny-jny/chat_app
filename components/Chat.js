@@ -49,7 +49,7 @@ export default class Chat extends Component {
   checkNullUndefined(array){
     let result = false;
     array.forEach((element) => {
-      if(element == null || element == undefined){
+      if(element === null || element === undefined){
         result = true;
       }
     })
@@ -64,10 +64,12 @@ export default class Chat extends Component {
       let data = doc.data();
       messages.push({
         _id: data._id,
-        text: data.text,
+        text: data.text || '',
         createdAt: data.createdAt.toDate(),
         user: data.user,
-        system: data.system
+        system: data.system,
+        image: data.image || null,
+        location: data.location || null
       });
       this.setState({messages});
       this.saveMessages();
@@ -178,7 +180,7 @@ export default class Chat extends Component {
             if(this.checkNullUndefined(querySnapshot)){
               alert('The messages contain undefined or null values');
             }else{
-              //listen for collection changes for current user
+              // listen for collection changes for current user
               this.unsubscribe = this.referenceChatMessages.orderBy('createdAt', 'desc').onSnapshot(this.onCollectionUpdate);
             }
           }).catch((error) => {
@@ -207,9 +209,11 @@ export default class Chat extends Component {
     const message = this.state.messages[0];
     this.referenceChatMessages.add({
       _id: message._id,
-      text: message.text,
+      text: message.text || '',
       createdAt: message.createdAt,
-      user: message.user
+      user: message.user,
+      image: message.image || null,
+      location: message.location || null
     });
   }
 
