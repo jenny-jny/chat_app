@@ -26,12 +26,12 @@ npm install expo-cli --global
 * If you would like to run the app on your mobile device, you'll need to install the Expo app through your device's app store (iOS or Android)
 * You will also need an Expo account which can be created via [Expo.io](https://expo.io)
 * You will need to login into Expo in order to access the App
-** Logging into Expo through the CLI on your machine
-** Logging into Expo on your mobile device in the Expo app
+  - Logging into Expo through the CLI on your machine
+  - Logging into Expo on your mobile device in the Expo app
 
 * If you would like to run the app on your machine through a simulator/emulator, you will either need
-** [Android Studio](https://docs.expo.io/workflow/android-studio-emulator/)
-** [iOS Simulator](https://docs.expo.io/workflow/ios-simulator/)
+  - [Android Studio](https://docs.expo.io/workflow/android-studio-emulator/)
+  - [iOS Simulator](https://docs.expo.io/workflow/ios-simulator/)
 
 ### Installing Dependencies
 
